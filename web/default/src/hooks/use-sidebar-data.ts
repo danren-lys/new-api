@@ -31,6 +31,7 @@ import {
   Ticket,
   User,
   Users,
+  Volume2,
   Wallet,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -60,6 +61,11 @@ export function useSidebarData(): SidebarData {
             title: t('Chat'),
             icon: MessageSquare,
             type: 'chat-presets',
+          },
+          {
+            title: t('Text to Speech'),
+            url: '/tts',
+            icon: Volume2,
           },
         ],
       },
