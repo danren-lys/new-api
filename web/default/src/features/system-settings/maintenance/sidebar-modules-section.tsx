@@ -92,6 +92,10 @@ export function SidebarModulesSection({
         title: t('Chat'),
         description: t('Access previous conversations and start new ones.'),
       },
+      tts: {
+        title: t('Text to Speech'),
+        description: t('Convert text to natural-sounding speech.'),
+      },
     },
     console: {
       detail: {
