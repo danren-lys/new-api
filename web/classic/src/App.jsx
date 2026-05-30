@@ -49,6 +49,7 @@ import OAuth2Callback from './components/auth/OAuth2Callback';
 import PersonalSetting from './components/settings/PersonalSetting';
 import Setup from './pages/Setup';
 import SetupCheck from './components/layout/SetupCheck';
+import TTS from './pages/TTS';
 
 const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -374,6 +375,14 @@ function App() {
               <Suspense fallback={<Loading></Loading>} key={location.pathname}>
                 <Chat2Link />
               </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path='/tts'
+          element={
+            <PrivateRoute>
+              <TTS />
             </PrivateRoute>
           }
         />

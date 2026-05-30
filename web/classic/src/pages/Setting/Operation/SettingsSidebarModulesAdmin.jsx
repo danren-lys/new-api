@@ -44,6 +44,7 @@ export default function SettingsSidebarModulesAdmin(props) {
       enabled: true,
       playground: true,
       chat: true,
+      tts: true,
     },
     console: {
       enabled: true,
@@ -105,6 +106,7 @@ export default function SettingsSidebarModulesAdmin(props) {
         enabled: true,
         playground: true,
         chat: true,
+        tts: true,
       },
       console: {
         enabled: true,
@@ -217,6 +219,11 @@ export default function SettingsSidebarModulesAdmin(props) {
           description: t('AI模型测试环境'),
         },
         { key: 'chat', title: t('聊天'), description: t('聊天会话管理') },
+        {
+          key: 'tts',
+          title: t('文转语音'),
+          description: t('将文本转换为语音'),
+        },
       ],
     },
     {

@@ -49,6 +49,7 @@ const routerMap = {
   deployment: '/console/deployment',
   playground: '/console/playground',
   personal: '/console/personal',
+  tts: '/tts',
 };
 
 const SiderBar = ({ onNavigate = () => {} }) => {
@@ -211,6 +212,11 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('聊天'),
         itemKey: 'chat',
         items: chatItems,
+      },
+      {
+        text: t('文转语音'),
+        itemKey: 'tts',
+        to: '/tts',
       },
     ];
 

@@ -74,6 +74,7 @@ export default function SettingsSidebarModulesUser() {
         enabled: true,
         playground: isSidebarModuleAllowed('chat', 'playground'),
         chat: isSidebarModuleAllowed('chat', 'chat'),
+        tts: isSidebarModuleAllowed('chat', 'tts'),
       };
     }
 
@@ -301,6 +302,11 @@ export default function SettingsSidebarModulesUser() {
           description: t('AI模型测试环境'),
         },
         { key: 'chat', title: t('聊天'), description: t('聊天会话管理') },
+        {
+          key: 'tts',
+          title: t('文转语音'),
+          description: t('将文本转换为语音'),
+        },
       ],
     },
     {
