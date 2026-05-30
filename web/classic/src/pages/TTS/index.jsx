@@ -27,7 +27,7 @@ import {
   TextArea,
   Typography,
   RadioGroup,
-  RadioButton,
+  Radio,
 } from '@douyinfe/semi-ui';
 import { Volume2, Download, Loader2, Link } from 'lucide-react';
 import { API, showError, showSuccess } from '../../helpers';
@@ -309,8 +309,8 @@ function TextToSpeech() {
               value={deliveryMode}
               onChange={(e) => setDeliveryMode(e.target.value)}
             >
-              <RadioButton value='play'>{t('直接播放')}</RadioButton>
-              <RadioButton value='url'>{t('下载链接')}</RadioButton>
+              <Radio value='play'>{t('直接播放')}</Radio>
+              <Radio value='url'>{t('下载链接')}</Radio>
             </RadioGroup>
           </div>
 
