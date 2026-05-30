@@ -39,7 +39,13 @@ func (a *Adaptor) ConvertAudioRequest(c *gin.Context, info *relaycommon.RelayInf
 
 	voiceID := request.Voice
 	speed := lo.FromPtrOr(request.Speed, 0.0)
-	outputFormat := request.ResponseFormat
+	audioFormat := request.ResponseFormat // mp3, wav, flac, or "url"
+
+	outputFormat := "hex"
+	if audioFormat == "url" {
+		outputFormat = "url"
+		audioFormat = "mp3"
+	}
 
 	minimaxRequest := MiniMaxTTSRequest{
 		Model: info.OriginModelName,
@@ -49,7 +55,7 @@ func (a *Adaptor) ConvertAudioRequest(c *gin.Context, info *relaycommon.RelayInf
 			Speed:   speed,
 		},
 		AudioSetting: &AudioSetting{
-			Format: outputFormat,
+			Format: audioFormat,
 		},
 		OutputFormat: outputFormat,
 	}
@@ -65,11 +71,8 @@ func (a *Adaptor) ConvertAudioRequest(c *gin.Context, info *relaycommon.RelayInf
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling minimax request: %w", err)
 	}
-	if outputFormat != "hex" {
-		outputFormat = "url"
-	}
 
-	c.Set("response_format", outputFormat)
+	c.Set("response_format", minimaxRequest.OutputFormat)
 
 	// Debug: log the request structure
 	// fmt.Printf("MiniMax TTS Request: %s\n", string(jsonData))

@@ -145,7 +145,14 @@ func handleTTSResponse(c *gin.Context, resp *http.Response, info *relaycommon.Re
 	}
 
 	if strings.HasPrefix(minimaxResp.Data.Audio, "http") {
-		c.Redirect(http.StatusFound, minimaxResp.Data.Audio)
+		responseFormat := c.GetString("response_format")
+		if responseFormat == "url" {
+			c.JSON(http.StatusOK, gin.H{
+				"audio_url": minimaxResp.Data.Audio,
+			})
+		} else {
+			c.Redirect(http.StatusFound, minimaxResp.Data.Audio)
+		}
 	} else {
 		// Handle hex-encoded audio data
 		audioData, decodeErr := hex.DecodeString(minimaxResp.Data.Audio)

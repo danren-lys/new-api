@@ -26,8 +26,10 @@ import {
   Slider,
   TextArea,
   Typography,
+  RadioGroup,
+  RadioButton,
 } from '@douyinfe/semi-ui';
-import { Volume2, Download, Loader2 } from 'lucide-react';
+import { Volume2, Download, Loader2, Link } from 'lucide-react';
 import { API, showError, showSuccess } from '../../helpers';
 
 const { Title, Text } = Typography;
@@ -203,8 +205,6 @@ const MODEL_OPTIONS = [
   { value: 'speech-2.6-turbo', label: 'speech-2.6-turbo (快速)' },
   { value: 'speech-02-hd', label: 'speech-02-hd (高清)' },
   { value: 'speech-02-turbo', label: 'speech-02-turbo (快速)' },
-  { value: 'speech-01-hd', label: 'speech-01-hd (高清)' },
-  { value: 'speech-01-turbo', label: 'speech-01-turbo (快速)' },
 ];
 
 const FORMAT_OPTIONS = [
@@ -222,8 +222,10 @@ function TextToSpeech() {
   const [model, setModel] = useState('speech-2.8-turbo');
   const [speed, setSpeed] = useState(1.0);
   const [format, setFormat] = useState('mp3');
+  const [deliveryMode, setDeliveryMode] = useState('play');
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [downloadLink, setDownloadLink] = useState(null);
   const audioRef = useRef(null);
 
   const handleGenerate = async () => {
@@ -234,25 +236,40 @@ function TextToSpeech() {
 
     setIsGenerating(true);
     setAudioUrl(null);
+    setDownloadLink(null);
 
     try {
+      const responseFormat = deliveryMode === 'url' ? 'url' : format;
+
       const payload = {
         model,
         input: text,
         voice,
-        response_format: format,
+        response_format: responseFormat,
         speed,
       };
 
-      const response = await API.post(TTS_API_ENDPOINT, payload, {
-        responseType: 'blob',
-        skipErrorHandler: true,
-      });
+      const config = { skipErrorHandler: true };
+      if (deliveryMode === 'play') {
+        config.responseType = 'blob';
+      }
 
-      const blob = response.data;
-      const url = URL.createObjectURL(blob);
-      setAudioUrl(url);
-      showSuccess(t('音频生成成功'));
+      const response = await API.post(TTS_API_ENDPOINT, payload, config);
+
+      if (deliveryMode === 'url') {
+        const data = response.data;
+        if (data.audio_url) {
+          setDownloadLink(data.audio_url);
+          showSuccess(t('下载链接获取成功'));
+        } else {
+          showError(t('未获取到下载链接'));
+        }
+      } else {
+        const blob = response.data;
+        const url = URL.createObjectURL(blob);
+        setAudioUrl(url);
+        showSuccess(t('音频生成成功'));
+      }
     } catch (error) {
       const msg =
         error?.response?.data?.message || error?.message || t('音频生成失败');
@@ -283,6 +300,20 @@ function TextToSpeech() {
 
       <Card style={{ borderRadius: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <Text style={{ marginBottom: 6, display: 'block', fontWeight: 500 }}>
+              {t('获取方式')}
+            </Text>
+            <RadioGroup
+              type='button'
+              value={deliveryMode}
+              onChange={(e) => setDeliveryMode(e.target.value)}
+            >
+              <RadioButton value='play'>{t('直接播放')}</RadioButton>
+              <RadioButton value='url'>{t('下载链接')}</RadioButton>
+            </RadioGroup>
+          </div>
+
           <div>
             <Text style={{ marginBottom: 6, display: 'block', fontWeight: 500 }}>
               {t('模型')}
@@ -334,17 +365,19 @@ function TextToSpeech() {
             />
           </div>
 
-          <div>
-            <Text style={{ marginBottom: 6, display: 'block', fontWeight: 500 }}>
-              {t('格式')}
-            </Text>
-            <Select
-              value={format}
-              onChange={setFormat}
-              style={{ width: '100%' }}
-              optionList={FORMAT_OPTIONS}
-            />
-          </div>
+          {deliveryMode === 'play' && (
+            <div>
+              <Text style={{ marginBottom: 6, display: 'block', fontWeight: 500 }}>
+                {t('格式')}
+              </Text>
+              <Select
+                value={format}
+                onChange={setFormat}
+                style={{ width: '100%' }}
+                optionList={FORMAT_OPTIONS}
+              />
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
@@ -353,13 +386,13 @@ function TextToSpeech() {
               onClick={handleGenerate}
               loading={isGenerating}
               disabled={!text.trim()}
-              icon={<Volume2 size={16} />}
+              icon={deliveryMode === 'url' ? <Link size={16} /> : <Volume2 size={16} />}
               style={{ flex: 1, borderRadius: 8 }}
             >
-              {isGenerating ? t('生成中...') : t('生成语音')}
+              {isGenerating ? t('生成中...') : deliveryMode === 'url' ? t('获取下载链接') : t('生成语音')}
             </Button>
 
-            {audioUrl && (
+            {deliveryMode === 'play' && audioUrl && (
               <Button
                 theme='outline'
                 onClick={handleDownload}
@@ -371,7 +404,7 @@ function TextToSpeech() {
             )}
           </div>
 
-          {audioUrl && (
+          {deliveryMode === 'play' && audioUrl && (
             <div>
               <Text
                 style={{ marginBottom: 6, display: 'block', fontWeight: 500 }}
@@ -379,6 +412,45 @@ function TextToSpeech() {
                 {t('预览')}
               </Text>
               <audio ref={audioRef} src={audioUrl} controls style={{ width: '100%' }} />
+            </div>
+          )}
+
+          {deliveryMode === 'url' && downloadLink && (
+            <div>
+              <Text
+                style={{ marginBottom: 6, display: 'block', fontWeight: 500 }}
+              >
+                {t('下载链接')}
+              </Text>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <a
+                  href={downloadLink}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  style={{
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: 'var(--semi-color-link)',
+                  }}
+                >
+                  {downloadLink}
+                </a>
+                <Button
+                  theme='outline'
+                  size='small'
+                  onClick={() => {
+                    navigator.clipboard.writeText(downloadLink);
+                    showSuccess(t('链接已复制'));
+                  }}
+                >
+                  {t('复制')}
+                </Button>
+              </div>
+              <Text type='tertiary' size='small' style={{ marginTop: 4, display: 'block' }}>
+                {t('链接 24 小时内有效，用户可直接下载，不占用服务器带宽')}
+              </Text>
             </div>
           )}
         </div>
